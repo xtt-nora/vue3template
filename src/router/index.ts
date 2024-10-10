@@ -1,33 +1,20 @@
 import type { App } from "vue";
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-
-export const Layout = () => import("@/layout/index.vue");
-
+import { isPhone } from "@/utils/index";
+import NotFound from "@/views/error/404.vue";
+let isPc = isPhone();
 // 静态路由
 export const constantRoutes: RouteRecordRaw[] = [
-  {
-    path: "/redirect",
-    component: Layout,
-    meta: { hidden: true },
-    children: [
-      {
-        path: "/redirect/:path(.*)",
-        component: () => import("@/views/redirect/index.vue"),
-      },
-    ],
-  },
-
   {
     path: "/login",
     component: () => import("@/views/login/index.vue"),
     meta: { hidden: true },
   },
-
   {
     path: "/",
     name: "/",
-    component: Layout,
-    redirect: "/dashboard",
+    component: isPc ? () => import("@/views/dashboard/index.vue") : () => import("@/views/mobile/dashboard/index.vue"),
+    redirect: isPc ? "/dashboard" : "/mobile/dashboard",
     children: [
       {
         path: "dashboard",
@@ -41,6 +28,14 @@ export const constantRoutes: RouteRecordRaw[] = [
         },
       },
     ],
+  },
+  {
+    path: "/404",
+    name: "404",
+    component: () => import("@/views/error/404.vue"),
+    meta: {
+      title: "404页面",
+    },
   },
 ];
 

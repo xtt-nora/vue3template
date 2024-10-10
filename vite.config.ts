@@ -5,6 +5,8 @@ import Components from "unplugin-vue-components/vite";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import vue from "@vitejs/plugin-vue";
 import Icons from "unplugin-icons/vite";
+import { wrapperEnv } from "./build/getEnv";
+import { createProxy } from "./build/proxy";
 import IconsResolver from "unplugin-icons/resolver";
 import { createSvgIconsPlugin } from "vite-plugin-svg-icons";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
@@ -17,6 +19,7 @@ const __APP_INFO__ = {
 };
 const viteConfig = defineConfig((mode: ConfigEnv) => {
   const env = loadEnv(mode.mode, process.cwd());
+  const viteEnv = wrapperEnv(env);
   return {
     resolve: {
       alias: {
@@ -36,21 +39,10 @@ const viteConfig = defineConfig((mode: ConfigEnv) => {
       },
     },
     server: {
-      // 允许IP访问
       host: "0.0.0.0",
-      // 应用端口 (默认:3000)
-      port: Number(env.VITE_APP_PORT),
-      // 运行是否自动打开浏览器
-      open: true,
-      proxy: {
-        /** 代理前缀为 /dev-api 的请求  */
-        [env.VITE_APP_BASE_API]: {
-          changeOrigin: true,
-          // 接口地址 例如：http://vapi.youlai.tech
-          target: env.VITE_APP_API_URL,
-          rewrite: (path) => path.replace(new RegExp("^" + env.VITE_APP_BASE_API), ""),
-        },
-      },
+      port: viteEnv.VITE_PORT,
+      open: viteEnv.VITE_OPEN,
+      proxy: createProxy(viteEnv.VITE_PROXY),
     },
     plugins: [
       vue(),
